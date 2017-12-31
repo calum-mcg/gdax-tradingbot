@@ -11,7 +11,7 @@ TRANSACTIONSCSVNAME = "transactions.csv"
 LOOP_DURATION = 59 #seconds
 MAX_LOOP_TIME = 8 * 60 * 60 #seconds
 QUOTE_CURRENCY = 'BTC'
-BASE_CURRENCY = 'USD'
+BASE_CURRENCY = 'EUR'
 
 #Authenticate details
 CoinBase = CoinbaseExchange(API_KEY, API_SECRET, API_PASS, API_URL)
@@ -23,4 +23,8 @@ model = Model()
 product_id = CoinBase.getProductId(QUOTE_CURRENCY, BASE_CURRENCY)
 
 balance = CoinBase.getBalance(BASE_CURRENCY)
-print(balance)
+buy_price = CoinBase.determinePrice(product_id, "buy")
+use_balance = float(balance) * 0.2
+quantity = float(use_balance) / float(buy_price)
+print(buy_price)
+#CoinBase.buy(product_id, )

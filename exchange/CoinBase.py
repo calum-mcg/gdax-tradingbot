@@ -22,7 +22,7 @@ class CoinbaseExchange(object):
         request = requests.get(self.api_url + 'accounts', auth=self.auth)
         accounts = request.json()
         #Find index corresponding to currency
-        print(accounts)
+        #print(accounts)
         index = next(index for (index, d) in enumerate(accounts) if d["currency"] == currency)
         balance = accounts[index]['balance']
         return balance
@@ -51,7 +51,7 @@ class CoinbaseExchange(object):
         request = requests.get('https://api.gdax.com/' + 'products/' + product_id + '/book', data = json.dumps(parameters), auth=self.auth, timeout=30)
         book = request.json()
         if option == "buy":
-            buy_price = float(['bids'][0][0]) - 0.01
+            buy_price = float(book['bids'][0][0]) - 0.01
             return buy_price
         if option == "sell":
             sell_price = float(book['asks'][0][0]) + 0.01
