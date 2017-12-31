@@ -44,6 +44,19 @@ class CoinbaseExchange(object):
         price = product['price']
         return price
 
+    def determinePrice(self, product_id, option):
+        parameters = {
+            'level': '1'
+        }
+        request = requests.get('https://api.gdax.com/' + 'products/' + product_id + '/book', data = json.dumps(parameters), auth=self.auth, timeout=30)
+        book = request.json()
+        if option == "buy":
+            buy_price = float(['bids'][0][0]) - 0.01
+            return buy_price
+        if option == "sell":
+            sell_price = float(book['asks'][0][0]) + 0.01
+            return sell_price
+
     def buy(self, product_id, quantity, price, time_to_cancel):
         time_to_cancel = time_to_cancel + "hour"
         parameters = {

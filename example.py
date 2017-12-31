@@ -14,8 +14,8 @@ API_URL = 'https://api.gdax.com/'
 #Custom settings
 PRICECSVNAME = "price.csv"
 TRANSACTIONSCSVNAME = "transactions.csv"
-LOOP_DURATION = 60 #seconds
-MAX_LOOP_TIME = 10.5 * 60 * 60 #seconds
+LOOP_DURATION = 59 #seconds
+MAX_LOOP_TIME = 8 * 60 * 60 #seconds
 QUOTE_CURRENCY = 'BTC'
 BASE_CURRENCY = 'USD'
 
