@@ -22,10 +22,5 @@ model = Model()
 #Choose Product
 product_id = CoinBase.getProductId(QUOTE_CURRENCY, BASE_CURRENCY)
 
-balance = CoinBase.getBalance(BASE_CURRENCY)
-buy_price = CoinBase.determinePrice(product_id, "buy")
-use_balance = float(balance) * 0.1
-quantity = float(use_balance) / float(buy_price)
-print("Buy %s at price %s = %s" % (quantity, buy_price, use_balance))
-order = CoinBase.buy(product_id, quantity, buy_price)
+order = model.sell(product_id, CoinBase, QUOTE_CURRENCY)
 print(order)

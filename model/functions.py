@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 class Model(object):
     def __init__(self):
         self.ema_dataframe = pd.DataFrame(data={'datetime': [],'price': [], 'EMA4': [], 'EMA18': [], 'signal': []})
-        self.transaction_dataframe = pd.DataFrame(data={'product_id' : [], 'datetime': [], 'buy/sell': [], 'price': [],   'quantity': []})
+        self.transaction_dataframe = pd.DataFrame(data={'product_id' : [], 'datetime': [], 'buy/sell': [], 'price': [], 'quantity': [], 'status': []})
 
     def calculateEma(self, CoinBase, product_id):
         #Get current price and time
@@ -19,8 +19,8 @@ class Model(object):
         length = self.ema_dataframe.shape[0]
         if length>4:
             self.ema_dataframe['EMA4'] = self.ema_dataframe['price'].dropna().shift().fillna(self.ema_dataframe['EMA4']).ewm(com=4).mean()
-        if length>20:
-            self.ema_dataframe['EMA18'] = self.ema_dataframe['price'].dropna().shift().fillna(self.ema_dataframe['EMA18']).ewm(com=20).mean()
+        if length>18:
+            self.ema_dataframe['EMA18'] = self.ema_dataframe['price'].dropna().shift().fillna(self.ema_dataframe['EMA18']).ewm(com=18).mean()
 
     def calculateCrossover(self):
         length = self.ema_dataframe.shape[0]
@@ -39,22 +39,27 @@ class Model(object):
 
     def buy(self, product_id, CoinBase, base_currency):
         print("Buy signal. Logging..")
-        price = CoinBase.getPrice(product_id)
-        #TODO: calculate best price for market making
         time = CoinBase.getTime()
-        # balance = CoinBase.getBalance(base_currency)
-        balance = 1000.00
-        quantity = balance/float(price)
-        self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [product_id, time, 'buy', price, quantity]
+        buy_price = CoinBase.determinePrice(product_id, "buy")
+        balance = CoinBase.getBalance(base_currency)
+        balance = float(balance) * 0.1
+        quantity = float(balance)/float(buy_price)
+        order = CoinBase.buy(product_id, quantity, buy_price)
+        print(order)
+        status = order['status']
+        self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [product_id, time, 'buy', buy_price, quantity, status]
+        return order
 
     def sell(self, product_id, CoinBase, quote_currency):
         print("Sell signal. Logging..")
-        price = CoinBase.getPrice(product_id)
-        #TODO: calculate best price for market making
         time = CoinBase.getTime()
-        #position = CoinBase.getPosition(quote_currency)
-        position = 1.05
-        self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [product_id, time, 'sell', price, position]
+        sell_price = CoinBase.determinePrice(product_id, "sell")
+        quantity = CoinBase.getAccounts(quote_currency)
+        order = CoinBase.sell(product_id, quantity, sell_price)
+        print(order)
+        status = order['status']
+        self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [product_id, time, 'sell', sell_price, quantity, status]
+        return order
 
     def plotGraph(self):
         self.ema_dataframe['price'] = self.ema_dataframe['price'].astype(float)
