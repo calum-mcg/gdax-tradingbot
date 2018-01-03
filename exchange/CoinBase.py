@@ -57,8 +57,10 @@ class CoinbaseExchange(object):
             sell_price = float(book['asks'][0][0]) + 0.01
             return sell_price
 
-    def buy(self, product_id, quantity, price, time_to_cancel):
-        time_to_cancel = time_to_cancel + "hour"
+    def buy(self, product_id, quantity, price):
+        time_to_cancel = "hour"
+        #Rounded down to 11dp
+        quantity = (quantity // 0.00000000001) / 100000000000
         parameters = {
             'type': 'limit',
             'size': quantity,
