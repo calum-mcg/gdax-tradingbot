@@ -3,13 +3,9 @@ from threading import Event
 from exchange.CoinBase import *
 from model.functions import *
 from model.loop import *
+from config import *
 
-#Sandbox settings
-API_KEY = '6338bdfc20260afd7c4b8bb19201d7f2'
-API_SECRET = 'OR/8eTQitl0UVnsn3Wa/SW1f2yFfPq5kWwetgQ/kdJeaUXY6IA7pd1Wn+wZ9WOCJBzyb2ZgZHBuPDgW4hukwtA=='
-API_PASS = '8o98x0le6d7'
-#API_URL = 'https://api-public.sandbox.gdax.com/'
-API_URL = 'https://api.gdax.com/'
+
 
 #Custom settings
 PRICECSVNAME = "price.csv"
