@@ -21,6 +21,17 @@ class CoinbaseExchange(object):
         balance = accounts[index]['balance']
         return balance
 
+    def getOrderStatus(self, order_id):
+        request = requests.get(self.api_url + 'orders/' + order_id , auth=self.auth)
+        if request.status_code == 404:
+            # A 404 was issued - order doesnt exist
+            print('Order ID doesn not exist')
+            return False
+        else:
+            order = request.json()
+            status = order['status']
+            return status
+
     def getBalance(self, currency):
         request = requests.get(self.api_url + 'accounts', auth=self.auth)
         accounts = request.json()
@@ -63,7 +74,7 @@ class CoinbaseExchange(object):
     def buy(self, product_id, quantity, price):
         time_to_cancel = "hour"
         #Rounded down to 11dp
-        quantity = (quantity // 0.00000000001) / 100000000000
+        quantity = (quantity // 0.00000001) / 100000000
         parameters = {
             'type': 'limit',
             'size': quantity,
@@ -95,6 +106,15 @@ class CoinbaseExchange(object):
         request = requests.post(self.api_url + 'orders', data = json.dumps(parameters), auth=self.auth, timeout=30)
         sell_order = request.json()
         return sell_order
+
+    def cancelOrder(self, order_id):
+        request = requests.delete(self.api_url + 'orders/' + order_id , auth=self.auth)
+        result = request.json()
+        if 'message' in result:
+            print(result['message'])
+            return False
+        else:
+            return True
 
     def getOrders(self):
         request = requests.get(self.api_url + 'orders', auth=self.auth)

@@ -8,7 +8,9 @@ logging.basicConfig(level=logging.INFO)
 class Model(object):
     def __init__(self):
         self.ema_dataframe = pd.DataFrame(data={'datetime': [],'price': [], 'EMA4': [], 'EMA18': [], 'signal': []})
-        self.transaction_dataframe = pd.DataFrame(data={'product_id' : [], 'datetime': [], 'buy/sell': [], 'price': [], 'quantity': [], 'status': []})
+        self.transaction_dataframe = pd.DataFrame(data={'GDAX_id' : [], 'product_id' : [], 'datetime': [], 'buy/sell': [], 'price': [], 'quantity': [], 'status': []})
+        self.csv_price = 'price.csv'
+        self.csv_transactions = 'transactions.csv'
 
     def calculateEma(self, CoinBase, product_id):
         #Get current price and time
@@ -45,10 +47,15 @@ class Model(object):
         balance = float(balance) * 0.1
         quantity = float(balance)/float(buy_price)
         order = CoinBase.buy(product_id, quantity, buy_price)
-        print(order)
-        status = order['status']
-        self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [product_id, time, 'buy', buy_price, quantity, status]
-        return order
+        if 'id' in order:
+            id = order['id']
+            status = order['status']
+            self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [id, product_id, time, 'buy', buy_price, quantity, status]
+            self.logTransactions(True)
+            return order
+        else:
+            print(order)
+            return -1 
 
     def sell(self, product_id, CoinBase, quote_currency):
         print("Sell signal. Logging..")
@@ -56,10 +63,15 @@ class Model(object):
         sell_price = CoinBase.determinePrice(product_id, "sell")
         quantity = CoinBase.getAccounts(quote_currency)
         order = CoinBase.sell(product_id, quantity, sell_price)
-        print(order)
-        status = order['status']
-        self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [product_id, time, 'sell', sell_price, quantity, status]
-        return order
+        if 'id' in order:
+            id = order['id']
+            status = order['status']
+            self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [id, product_id, time, 'sell', sell_price, quantity, status]
+            self.logTransactions(True)
+            return order
+        else:
+            print(order)
+            return -1 
 
     def plotGraph(self):
         self.ema_dataframe['price'] = self.ema_dataframe['price'].astype(float)
@@ -73,8 +85,14 @@ class Model(object):
         plt.legend()
         plt.show()
 
-    def logPrice(self, csvname):
-        self.ema_dataframe.to_csv(csvname, encoding='utf-8', index=False)
+    def logPrice(self, append):
+        if (append):
+            self.ema_dataframe.to_csv(self.csv_price, encoding='utf-8', mode='a', index=False)
+        else:
+            self.ema_dataframe.to_csv(self.csv_price, encoding='utf-8', index=False)          
 
-    def logTransactions(self, csvname):
-        self.transaction_dataframe.to_csv(csvname, encoding='utf-8', index=False)
+    def logTransactions(self, append):
+        if (append):
+            self.transaction_dataframe.to_csv(self.csv_transactions, encoding='utf-8', mode='a', index=False)
+        else:
+            self.transaction_dataframe.to_csv(self.csv_transactions, encoding='utf-8', index=False)  

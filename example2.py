@@ -6,8 +6,7 @@ from model.loop import *
 from config import *
 
 #Custom settings
-PRICECSVNAME = "price.csv"
-TRANSACTIONSCSVNAME = "transactions.csv"
+
 LOOP_DURATION = 59 #seconds
 MAX_LOOP_TIME = 8 * 60 * 60 #seconds
 QUOTE_CURRENCY = 'BTC'
@@ -22,5 +21,23 @@ model = Model()
 #Choose Product
 product_id = CoinBase.getProductId(QUOTE_CURRENCY, BASE_CURRENCY)
 
+
+order = model.buy(product_id, CoinBase, BASE_CURRENCY)
+order_id = order['id']
+
+while True:
+	order_status = CoinBase.getOrderStatus(order_id)
+	if order_status == "done":
+		print("Buy fulfilled")
+		break
+	time.sleep(0.5)
+
 order = model.sell(product_id, CoinBase, QUOTE_CURRENCY)
-print(order)
+order_id = order['id']
+
+while True:
+	order_status = CoinBase.getOrderStatus(order_id)
+	if order_status == "done":
+		print("Sell fulfilled")
+		break
+	time.sleep(0.5)
