@@ -21,23 +21,25 @@ model = Model()
 #Choose Product
 product_id = CoinBase.getProductId(QUOTE_CURRENCY, BASE_CURRENCY)
 
-
+#Test buy, check status and sell
 order = model.buy(product_id, CoinBase, BASE_CURRENCY)
 order_id = order['id']
+print("ID: {}, Order: Buy, Status: {}".format(order_id, order['status']))
 
 while True:
 	order_status = CoinBase.getOrderStatus(order_id)
 	if order_status == "done":
-		print("Buy fulfilled")
+		print("Buy fulfilled at {}".format(order['price']))
 		break
 	time.sleep(0.5)
 
 order = model.sell(product_id, CoinBase, QUOTE_CURRENCY)
 order_id = order['id']
+print("ID: {}, Order: Sell, Status: {}".format(order_id, order['status']))
 
 while True:
 	order_status = CoinBase.getOrderStatus(order_id)
 	if order_status == "done":
-		print("Sell fulfilled")
+		print("Sell fulfilled at {}".format(order['price']))
 		break
 	time.sleep(0.5)

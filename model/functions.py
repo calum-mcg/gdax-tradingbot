@@ -40,7 +40,6 @@ class Model(object):
             return signal
 
     def buy(self, product_id, CoinBase, base_currency):
-        print("Buy signal. Logging..")
         time = CoinBase.getTime()
         buy_price = CoinBase.determinePrice(product_id, "buy")
         balance = CoinBase.getBalance(base_currency)
@@ -58,7 +57,6 @@ class Model(object):
             return -1 
 
     def sell(self, product_id, CoinBase, quote_currency):
-        print("Sell signal. Logging..")
         time = CoinBase.getTime()
         sell_price = CoinBase.determinePrice(product_id, "sell")
         quantity = CoinBase.getAccounts(quote_currency)
