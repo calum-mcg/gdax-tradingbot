@@ -1,9 +1,6 @@
-import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 from exchange import *
-
-logging.basicConfig(level=logging.INFO)
 
 class Model(object):
     def __init__(self):
@@ -11,18 +8,21 @@ class Model(object):
         self.transaction_dataframe = pd.DataFrame(data={'GDAX_id' : [], 'product_id' : [], 'datetime': [], 'buy/sell': [], 'price': [], 'quantity': [], 'status': []})
         self.csv_price = 'price.csv'
         self.csv_transactions = 'transactions.csv'
+        #Create CSV files for logging
+        self.logPrice(False)
+        self.logTransactions(False)
 
     def calculateEma(self, CoinBase, product_id):
         #Get current price and time
         price = CoinBase.getPrice(product_id)
         datetime = CoinBase.getTime()
-
         self.ema_dataframe = self.ema_dataframe.append(pd.DataFrame({'datetime': datetime, 'price': price}, index=[0]), ignore_index=True)
         length = self.ema_dataframe.shape[0]
         if length>4:
             self.ema_dataframe['EMA4'] = self.ema_dataframe['price'].dropna().shift().fillna(self.ema_dataframe['EMA4']).ewm(com=4).mean()
         if length>18:
             self.ema_dataframe['EMA18'] = self.ema_dataframe['price'].dropna().shift().fillna(self.ema_dataframe['EMA18']).ewm(com=18).mean()
+        self.logPrice(True)
 
     def calculateCrossover(self):
         length = self.ema_dataframe.shape[0]
@@ -36,7 +36,6 @@ class Model(object):
             else:
                 signal = {"signal": False, "value": None}
             self.ema_dataframe.loc[self.ema_dataframe.index[length-1], 'signal'] = signal['value']
-            print(self.ema_dataframe)
             return signal
 
     def buy(self, product_id, CoinBase, base_currency):
@@ -60,7 +59,23 @@ class Model(object):
         time = CoinBase.getTime()
         sell_price = CoinBase.determinePrice(product_id, "sell")
         quantity = CoinBase.getAccounts(quote_currency)
-        order = CoinBase.sell(product_id, quantity, sell_price)
+        order = CoinBase.sell(product_id, quantity, sell_price, False)
+        if 'id' in order:
+            id = order['id']
+            status = order['status']
+            self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [id, product_id, time, 'sellUpper', sell_price, quantity, status]
+            self.logTransactions(True)
+            return order
+        else:
+            print(order)
+            return -1 
+
+    def sellUpper(self, product_id, CoinBase, quote_currency):
+        time = CoinBase.getTime()
+        sell_price = CoinBase.determinePrice(product_id, "sell")
+        sell_price = float(sell_price) * 1.005
+        quantity = CoinBase.getAccounts(quote_currency)
+        order = CoinBase.sell(product_id, quantity, sell_price, True)
         if 'id' in order:
             id = order['id']
             status = order['status']

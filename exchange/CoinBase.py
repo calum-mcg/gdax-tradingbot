@@ -25,7 +25,7 @@ class CoinbaseExchange(object):
         request = requests.get(self.api_url + 'orders/' + order_id , auth=self.auth)
         if request.status_code == 404:
             # A 404 was issued - order doesnt exist
-            print('Order ID doesn not exist')
+            print('Order ID does not exist')
             return False
         else:
             order = request.json()
@@ -36,7 +36,6 @@ class CoinbaseExchange(object):
         request = requests.get(self.api_url + 'accounts', auth=self.auth)
         accounts = request.json()
         #Find index corresponding to currency
-        #print(accounts)
         index = next(index for (index, d) in enumerate(accounts) if d["currency"] == currency)
         balance = accounts[index]['balance']
         return balance
@@ -89,20 +88,31 @@ class CoinbaseExchange(object):
         buy_order = request.json()
         return buy_order
 
-    def sell(self, product_id, quantity, price):
-        time_to_cancel = "hour"
+    def sell(self, product_id, quantity, price, upper):
         #Round price to 2DP
-        price = round(float(price), 2)
-        parameters = {
-            'type': 'limit',
-            'size': quantity,
-            'price': price,
-            'side': 'sell',
-            'product_id': product_id,
-            'time_in_force': 'GTT',
-            'cancel_after': time_to_cancel,
-            'post_only': True
-        }
+        price = round(float(price), 2)       
+        if upper is True:
+            parameters = {
+                'type': 'limit',
+                'size': quantity,
+                'price': price,
+                'side': 'sell',
+                'product_id': product_id,
+                'time_in_force': 'GTC',
+                'post_only': True
+            }            
+        else:
+            time_to_cancel = "hour"
+            parameters = {
+                'type': 'limit',
+                'size': quantity,
+                'price': price,
+                'side': 'sell',
+                'product_id': product_id,
+                'time_in_force': 'GTT',
+                'cancel_after': time_to_cancel,
+                'post_only': True
+            }            
         request = requests.post(self.api_url + 'orders', data = json.dumps(parameters), auth=self.auth, timeout=30)
         sell_order = request.json()
         return sell_order
