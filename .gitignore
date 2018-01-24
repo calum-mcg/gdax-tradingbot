@@ -1,3 +1,5 @@
 price.csv
 transactions.csv
 config.py
+_pycache_/
+.pyc
