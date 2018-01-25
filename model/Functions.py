@@ -1,3 +1,5 @@
+
+from datetime import datetime
 import pandas as pd
 import os.path
 import matplotlib.pyplot as plt
@@ -30,7 +32,6 @@ class Model(object):
             self.ema_dataframe['EMA5'] = self.ema_dataframe['price'].dropna().shift().fillna(self.ema_dataframe['EMA5']).ewm(com=5).mean()
         if length>20:
             self.ema_dataframe['EMA20'] = self.ema_dataframe['price'].dropna().shift().fillna(self.ema_dataframe['EMA20']).ewm(com=20).mean()
-        self.logPrice(True)
 
     def calculateCrossover(self):
         #Calculate EMA crossover and return signal
@@ -45,6 +46,7 @@ class Model(object):
             else:
                 signal = {'signal': False, 'value': None}
             self.ema_dataframe.loc[self.ema_dataframe.index[length-1], 'signal'] = signal['value']
+            self.logPrice(True)
             return signal
 
     def buy(self, product_id, CoinBase, base_currency):

@@ -2,5 +2,6 @@ price.csv
 transactions.csv
 config.py
 __pycache__/
-.pyc
+*.pyc
 .idea/
+*.xlsx

@@ -21,6 +21,8 @@ class TimedThread(Thread):
         self.product_id = self.CoinBase.getProductId(self.quote_currency, self.base_currency)
         #Specify timeout duration
         self.order_timeout = 900 #15 minutes (in seconds)
+        #Display welcome message
+        print('Running...')
 
     def run(self):
     	#Run thread until stopped by 'stopFlag' Event, waiting at set intervals
@@ -104,7 +106,9 @@ class TimedThread(Thread):
 	    if signal is not None:
 	        if signal['value'] == 'buy':
 	            order_thread = Thread(target=self.order, args=('buy',))
+	            order_thread.daemon = True
 	            order_thread.start()
 	        elif signal['value'] == 'sell':
 	            order_thread = Thread(target=self.order, args=('sell',))
+	            order_thread.daemon = True
 	            order_thread.start()

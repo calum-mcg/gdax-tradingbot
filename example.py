@@ -12,6 +12,7 @@ CSV_TRANSACTIONS = "transactions.csv" # Transaction CSV name
 #Start thread
 stopFlag = Event()
 thread = TimedThread(stopFlag, LOOP_DURATION, QUOTE_CURRENCY, BASE_CURRENCY, CSV_PRICE, CSV_TRANSACTIONS)
+thread.daemon = True
 thread.start()
 
 #Set max time to run

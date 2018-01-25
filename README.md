@@ -32,19 +32,10 @@ API_PASS = ""
 API_URL = "https://api.gdax.com/" #Sandbox: https://api-public.sandbox.gdax.com
 ```
 
-The project was built and tested with Python 3.6.4. The project requires the following packages:
+The project was built and tested with Python 3.6.4. To install the required packages, run the following:
 
 ```
-pandas
-matplotlib.pyplot
-threading
-hmac
-hashlib
-requests
-base64
-json
-requests
-datetime
+pip install -r requirements.txt
 ```
 ### Customisation
 
