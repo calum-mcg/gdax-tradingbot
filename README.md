@@ -5,7 +5,7 @@ The bot uses a simple exponential moving average (EMA) crossover strategy to att
 
 The exit strategy of the bot is straightforward. Once a buy order has been fulfilled, the bot waits for either the price to change +40 basis points or for the EMAs to intercept. The first event to occur triggers the bot to sell the position.
 
-The bot creates orders that only provide liquidity to the market and thus are market 'maker' orders. The significance of this is that GDAX currently charges 0% on fees for 'maker' orders.
+The bot creates orders that only provide liquidity to the market and thus are market 'maker' orders. The significance of this is that GDAX currently charges 0% on fees for 'maker' orders<sup>[1](#myfootnote1)</sup>.
 
 The project uses Threads to perform separate functions:
 *  Grab live price, calculate EMAs and identify if a crossover has occurred
@@ -14,6 +14,8 @@ The project uses Threads to perform separate functions:
 As the bot runs, all prices and transactions are logged into separate CSV files.
 
 _Use at your own risk._
+
+<a name="myfootnote1">1</a>: 01/2018 [GDAX Fees](https://www.gdax.com/fees/BTC-USD)
 
 ## Getting Started
 
