@@ -2,6 +2,7 @@ import json, requests, datetime
 from exchange.CoinBaseAuthenticate import CoinbaseExchangeAuth
 
 class CoinbaseExchange(object):
+    #Class used to perform different actions on the GDAX API
     def __init__(self, api_key, secret_key, passphrase, api_url):
         self.api_url = api_url
         self.auth = CoinbaseExchangeAuth(api_key, secret_key, passphrase, api_url)
@@ -10,14 +11,13 @@ class CoinbaseExchange(object):
         request = requests.get(self.api_url + 'time')
         time = (request.json())['epoch']
         time_dt = datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d %H:%M:%S')
-       # print("Server datetime: %s" % TIMESTAMP_DT)
         return time_dt
 
     def getAccounts(self, quote_currency):
         request = requests.get(self.api_url + 'accounts', auth=self.auth)
         accounts = request.json()
         #Find index corresponding to pair
-        index = next(index for (index, d) in enumerate(accounts) if ((d["currency"] == quote_currency)))
+        index = next(index for (index, d) in enumerate(accounts) if ((d['currency'] == quote_currency)))
         balance = accounts[index]['balance']
         return balance
 
@@ -36,7 +36,7 @@ class CoinbaseExchange(object):
         request = requests.get(self.api_url + 'accounts', auth=self.auth)
         accounts = request.json()
         #Find index corresponding to currency
-        index = next(index for (index, d) in enumerate(accounts) if d["currency"] == currency)
+        index = next(index for (index, d) in enumerate(accounts) if d['currency'] == currency)
         balance = accounts[index]['balance']
         return balance
 
@@ -46,13 +46,14 @@ class CoinbaseExchange(object):
         request = requests.get(self.api_url + 'products', auth=self.auth)
         products = request.json()
         #Find index corresponding to pair
-        index = next(index for (index, d) in enumerate(products) if ((d["base_currency"] == base_currency) and (d["quote_currency"] == quote_currency)))
+        index = next(index for (index, d) in enumerate(products) if ((d['base_currency'] == base_currency) and (d['quote_currency'] == quote_currency)))
         product_id = products[index]['id']
         return product_id
 
     def getPrice(self, product_id):
         #SandBox price list is inaccurate
-        request = requests.get('https://api.gdax.com/' + 'products/' + product_id + '/ticker', auth=self.auth)
+        self.api_url = 'https://api.gdax.com/'
+        request = requests.get(self.api_url  + 'products/' + product_id + '/ticker', auth=self.auth)
         product = request.json()
         price = product['price']
         return price
@@ -63,15 +64,14 @@ class CoinbaseExchange(object):
         }
         request = requests.get('https://api.gdax.com/' + 'products/' + product_id + '/book', data = json.dumps(parameters), auth=self.auth, timeout=30)
         book = request.json()
-        if option == "buy":
+        if option == 'buy':
             buy_price = float(book['bids'][0][0]) - 0.01
             return buy_price
-        if option == "sell":
+        if option == 'sell':
             sell_price = float(book['asks'][0][0]) + 0.01
             return sell_price
 
     def buy(self, product_id, quantity, price):
-        time_to_cancel = "hour"
         #Rounded down to 11dp
         quantity = (quantity // 0.00000001) / 100000000
         parameters = {
@@ -80,8 +80,7 @@ class CoinbaseExchange(object):
             'price': price,
             'side': 'buy',
             'product_id': product_id,
-            'time_in_force': 'GTT',
-            'cancel_after': time_to_cancel,
+            'time_in_force': 'GTC',
             'post_only': True
         }
         request = requests.post(self.api_url + 'orders', data = json.dumps(parameters), auth=self.auth, timeout=30)
@@ -102,7 +101,7 @@ class CoinbaseExchange(object):
                 'post_only': True
             }            
         else:
-            time_to_cancel = "hour"
+            time_to_cancel = 'hour'
             parameters = {
                 'type': 'limit',
                 'size': quantity,

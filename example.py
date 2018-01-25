@@ -2,12 +2,12 @@ import time
 from model.TimedThread import *
 
 #Custom settings
-LOOP_DURATION = 58.5 # 58.5 minute - computing time
-MAX_LOOP_TIME = 8 * 60 * 60 #seconds
-QUOTE_CURRENCY = "BTC"
-BASE_CURRENCY = "EUR"
-CSV_PRICE = 'price.csv'
-CSV_TRANSACTIONS = 'transactions.csv'
+LOOP_DURATION = 58.5 # Time period (in seconds)
+MAX_LOOP_TIME = 8 * 60 * 60 # Max duration to run (in seconds)
+QUOTE_CURRENCY = "BTC" # Cryptocurrency of choice
+BASE_CURRENCY = "EUR" # Fiat currency of choice
+CSV_PRICE = "price.csv" # Price CSV name
+CSV_TRANSACTIONS = "transactions.csv" # Transaction CSV name
 
 #Start thread
 stopFlag = Event()

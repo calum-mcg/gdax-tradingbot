@@ -3,7 +3,9 @@ An automated GDAX trading bot built in Python.
 
 The bot uses a simple exponential moving average (EMA) crossover strategy to attempt to profit from short-term upwards trends in cryptocurrency. A buy/sell signal is triggered when the 5-period EMA and the 20-period EMA intercept. The bot uses the GDAX platform to buy/sell cryptocurrency, accessed via the official API.
 
-This project uses Threads to perform separate functions:
+The exit strategy of the bot is straightforward. Once a buy order has been fulfilled, the bot waits for either the price to change +40 basis points or for the EMAs to intercept. The first event to occur triggers the bot to sell the position.
+
+The project uses Threads to perform separate functions:
 *  Grab live price, calculate EMAs and identify if a crossover has occurred
 *  Perform a trading action - buy/sell depending on crossover
 
@@ -49,8 +51,8 @@ LOOP_DURATION = 58.5 # Time period (in seconds)
 MAX_LOOP_TIME = 8 * 60 * 60 # Max duration to run (in seconds)
 QUOTE_CURRENCY = "BTC" # Cryptocurrency of choice
 BASE_CURRENCY = "EUR" # Fiat currency of choice
-CSV_PRICE = 'price.csv' # Price CSV name
-CSV_TRANSACTIONS = 'transactions.csv' # Transaction CSV name
+CSV_PRICE = "price.csv" # Price CSV name
+CSV_TRANSACTIONS = "transactions.csv" # Transaction CSV name
 ```
 
 ## Authors

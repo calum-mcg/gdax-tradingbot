@@ -5,6 +5,8 @@ from model.Functions import *
 from config import *
 
 class TimedThread(Thread):
+	#Class used to log price, calculate EMA & Crossover and then trigger a separate thread to
+	#buy/sell the chosen cryptocurrency
     def __init__(self, event, wait_time, quote_currency, base_currency, csv_price, csv_transactions):
         Thread.__init__(self)
         self.stopped = event
@@ -18,14 +20,15 @@ class TimedThread(Thread):
 		#Choose Product
         self.product_id = self.CoinBase.getProductId(self.quote_currency, self.base_currency)
         #Specify timeout duration
-        self.order_timeout = 900 #15 minutes
+        self.order_timeout = 900 #15 minutes (in seconds)
 
     def run(self):
+    	#Run thread until stopped by 'stopFlag' Event, waiting at set intervals
         while not self.stopped.wait(self.wait_time):
         	self.EMACrossover()
 
-    def order(self, type):	
-    	if (type == "sell"):
+    def order(self, type):
+    	if (type == 'sell'):
     		#Sell product
 			#Get all open orders and cancel
     		open_orders = self.CoinBase.getOrders()
@@ -40,27 +43,28 @@ class TimedThread(Thread):
 	    		order_time = order['created_at']
 	    		order_id = order['id']
 	    		price = order['price']
-	    		print("Time: {}, Order: Sell, Price:{}, Status: {}".format(order_time, price, order['status']))
+	    		print('Time: {}, Order: Sell, Price:{}, Status: {}'.format(order_time, price, order['status']))
 	    		timer_count = 0
-
 	    		while True:
+	    			#Cancel order if timeout
 	    			if timer_count > self.order_timeout:
 	    				self.CoinBase.cancelOrder(order_id)
 	    				time_now = self.CoinBase.getTime()
-	    				print("Time: {}, Time limit exceeded, order cancelled".format(time_now))
+	    				print('Time: {}, Time limit exceeded, order cancelled'.format(time_now))
 	    				break
 	    			order_status = self.CoinBase.getOrderStatus(order_id)
-	    			if order_status == "done":
+	    			#Return success message if order successful
+	    			if order_status == 'done':
 	    				time_now = self.CoinBase.getTime()
-	    				print("Time: {}, Sell fulfilled at {}".format(time_now, order['price']))
+	    				print('Time: {}, Sell fulfilled at {}'.format(time_now, order['price']))
 	    				break
 	    			time.sleep(1)
 	    			timer_count = timer_count + 1
     		else:
     			order_time = self.CoinBase.getTime()
-    			print("Time: {}, Order: Sell, No currency available.".format(order_time))
+    			print('Time: {}, Order: Sell, No currency available.'.format(order_time))
     		
-    	elif (type == "buy"):
+    	elif (type == 'buy'):
     		current_balance = float(self.CoinBase.getBalance(self.base_currency))
     		if current_balance > 0:
 	    		#Buy product
@@ -68,36 +72,39 @@ class TimedThread(Thread):
 	    		order_time = order['created_at']
 	    		order_id = order['id']
 	    		price = order['price']
-	    		print("Time: {}, Order: Buy, Price:{},  Status: {}".format(order_time, price, order['status']))
+	    		print('Time: {}, Order: Buy, Price:{},  Status: {}'.format(order_time, price, order['status']))
 	    		timer_count = 0
 	    		while True:
+	    			#Cancel order if timeout
 	    			order_status = self.CoinBase.getOrderStatus(order_id)
 	    			if timer_count > self.order_timeout:
 	    				self.CoinBase.cancelOrder(order_id)
 	    				time_now = self.CoinBase.getTime()
-	    				print("Time: {}, Time limit exceeded, order cancelled".format(time_now))
+	    				print('Time: {}, Time limit exceeded, order cancelled'.format(time_now))
 	    				break
-	    			elif order_status == "done":
+	    			elif order_status == 'done':
+	    				#Return success message if order successful & create sell limit order
 	    				time_now = self.CoinBase.getTime()
-	    				print("Time: {}, Buy fulfilled at {}".format(time_now, order['price']))
+	    				print('Time: {}, Buy fulfilled at {}'.format(time_now, order['price']))
 	    				upper_order = self.model.sellUpper(self.product_id, self.CoinBase, self.quote_currency, order['price'])
 	    				order_time = upper_order['created_at']
 	    				order_price = upper_order['price']
-	    				print("Time:{}, Order: SellUpper, Price:{}, Status: {}".format(order_time, order_price, order['status']))
+	    				print('Time:{}, Order: SellUpper, Price:{}, Status: {}'.format(order_time, order_price, order['status']))
 	    				break
 	    			time.sleep(1)
 	    			timer_count = timer_count + 1
 	    	else:
     			order_time = self.CoinBase.getTime()
-    			print("Time: {}, Order: Buy, No currency available.".format(order_time))
+    			print('Time: {}, Order: Buy, No currency available.'.format(order_time))
 
     def EMACrossover(self):
+    	#Trigger order function on separate thread if EMA crossover detected
 	    self.model.calculateEma(self.CoinBase, self.product_id)
 	    signal = self.model.calculateCrossover()
 	    if signal is not None:
-	        if signal["value"] == "buy":
+	        if signal['value'] == 'buy':
 	            order_thread = Thread(target=self.order, args=('buy',))
 	            order_thread.start()
-	        elif signal["value"] == "sell":
+	        elif signal['value'] == 'sell':
 	            order_thread = Thread(target=self.order, args=('sell',))
 	            order_thread.start()

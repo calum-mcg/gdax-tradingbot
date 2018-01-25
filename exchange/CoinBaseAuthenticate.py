@@ -1,9 +1,9 @@
 import hmac, hashlib, requests, base64
 from requests.auth import AuthBase
 
-#Custom authentication for Exchange for GDAX
+#Authentication for Exchange for GDAX
+#Adapted from GDAX: https://docs.gdax.com/#signing-a-message
 class CoinbaseExchangeAuth(AuthBase):
-    #Taken from GDAX: https://docs.gdax.com/#signing-a-message
     def __init__(self, api_key, secret_key, passphrase, api_url):
         self.api_key = api_key
         self.secret_key = secret_key
@@ -17,7 +17,6 @@ class CoinbaseExchangeAuth(AuthBase):
         request.headers.update(get_auth_headers(timestamp, message, self.api_key, self.secret_key,
                                                 self.passphrase))
         return request
-
 
 def get_auth_headers(timestamp, message, api_key, secret_key, passphrase):
     message = message.encode('ascii')
