@@ -12,7 +12,7 @@ class Model(object):
         self.csv_price = csv_prices
         self.csv_transactions = csv_transactions
         #Create dataframes to store data
-        self.transaction_dataframe = pd.DataFrame(data={'GDAX_id' : [], 'product_id' : [], 'datetime': [], 'buy/sell': [], 'price': [], 'quantity': [], 'status': []})
+        self.transaction_dataframe = pd.DataFrame(data={'GDAX_id' : [], 'product_id' : [], 'datetime': [], 'buy/sell': [], 'price': [], 'quantity': [], 'status': [], 'fiat_balance' : []})
         self.ema_dataframe = pd.DataFrame(data={'datetime': [],'price': [], 'EMA5': [], 'EMA20': [], 'signal': []})
         #Add headers to CSV if don't exist
         csv_price_exists = os.path.isfile(self.csv_price)
@@ -59,7 +59,8 @@ class Model(object):
         if 'id' in order:
             id = order['id']
             status = order['status']
-            self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [id, product_id, time, 'buy', buy_price, quantity, status]
+            balance = CoinBase.getBalance(base_currency)
+            self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [id, product_id, time, 'buy', buy_price, quantity, status, balance]
             self.logTransactions(True)
             return order
         else:
@@ -75,7 +76,8 @@ class Model(object):
         if 'id' in order:
             id = order['id']
             status = order['status']
-            self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [id, product_id, time, 'sellUpper', sell_price, quantity, status]
+            balance = CoinBase.getBalance(base_currency)
+            self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [id, product_id, time, 'sellUpper', sell_price, quantity, status, balance]
             self.logTransactions(True)
             return order
         else:
@@ -91,7 +93,8 @@ class Model(object):
         if 'id' in order:
             id = order['id']
             status = order['status']
-            self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [id, product_id, time, 'sell', sell_price, quantity, status]
+            balance = CoinBase.getBalance(base_currency)
+            self.transaction_dataframe.loc[self.transaction_dataframe.shape[0]] =  [id, product_id, time, 'sell', sell_price, quantity, status, balance]
             self.logTransactions(True)
             return order
         else:
