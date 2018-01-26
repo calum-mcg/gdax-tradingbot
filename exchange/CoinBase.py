@@ -72,8 +72,8 @@ class CoinbaseExchange(object):
             return sell_price
 
     def buy(self, product_id, quantity, price):
-        #Rounded down to 11dp
-        quantity = (quantity // 0.00000001) / 100000000
+        #Rounded down to 7dp
+        quantity = (quantity // 0.0000001) / 10000000
         parameters = {
             'type': 'limit',
             'size': quantity,
