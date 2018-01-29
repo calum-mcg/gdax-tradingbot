@@ -41,7 +41,7 @@ class TimedThread(Thread):
     		current_balance = float(self.CoinBase.getBalance(self.quote_currency))
     		if current_balance > 0:
 				#Sell current position
-	    		order = self.model.sell(self.product_id, self.CoinBase, self.quote_currency)
+	    		order = self.model.sell(self.product_id, self.CoinBase, self.quote_currency, self.base_currency)
 	    		order_time = order['created_at']
 	    		order_id = order['id']
 	    		price = order['price']
@@ -88,7 +88,7 @@ class TimedThread(Thread):
 	    				#Return success message if order successful & create sell limit order
 	    				time_now = self.CoinBase.getTime()
 	    				print('Time: {}, Buy fulfilled at {}'.format(time_now, order['price']))
-	    				upper_order = self.model.sellUpper(self.product_id, self.CoinBase, self.quote_currency, order['price'])
+	    				upper_order = self.model.sellUpper(self.product_id, self.CoinBase, self.quote_currency, order['price'], self.base_currency)
 	    				order_time = upper_order['created_at']
 	    				order_price = upper_order['price']
 	    				print('Time:{}, Order: SellUpper, Price:{}, Status: {}'.format(order_time, order_price, order['status']))
@@ -100,8 +100,9 @@ class TimedThread(Thread):
     			print('Time: {}, Order: Buy, No currency available.'.format(order_time))
 
     def EMACrossover(self):
-    	#Trigger order function on separate thread if EMA crossover detected
+    	#Trigger order function on separate thread if EMA crossover detected & RSI within threshold
 	    self.model.calculateEma(self.CoinBase, self.product_id)
+	    self.model.calculateRSI(14)
 	    signal = self.model.calculateCrossover()
 	    if signal is not None:
 	        if signal['value'] == 'buy':

@@ -13,7 +13,7 @@ class Model(object):
         self.csv_transactions = csv_transactions
         #Create dataframes to store data
         self.transaction_dataframe = pd.DataFrame(data={'GDAX_id' : [], 'product_id' : [], 'datetime': [], 'buy/sell': [], 'price': [], 'quantity': [], 'status': [], 'fiat_balance' : []})
-        self.ema_dataframe = pd.DataFrame(data={'datetime': [],'price': [], 'EMA5': [], 'EMA20': [], 'signal': []})
+        self.ema_dataframe = pd.DataFrame(data={'datetime': [],'price': [], 'EMA5': [], 'EMA20': [], 'RSI': [], 'signal': []})
         #Add headers to CSV if don't exist
         csv_price_exists = os.path.isfile(self.csv_price)
         csv_transactions_exists = os.path.isfile(self.csv_transactions)
@@ -32,6 +32,20 @@ class Model(object):
             self.ema_dataframe['EMA5'] = self.ema_dataframe['price'].dropna().shift().fillna(self.ema_dataframe['EMA5']).ewm(com=5).mean()
         if length>20:
             self.ema_dataframe['EMA20'] = self.ema_dataframe['price'].dropna().shift().fillna(self.ema_dataframe['EMA20']).ewm(com=20).mean()
+    
+    def calculateRSI(self, period):
+        #Calculate RSI and add to dataframe
+        length = self.ema_dataframe.shape[0]
+        if length>period:
+            delta = self.ema_dataframe['price'].dropna().apply(float).diff()
+            dUp, dDown = delta.copy(), delta.copy()
+            dUp[dUp < 0] = 0
+            dDown[dDown > 0] = 0
+            RollUp = dUp.rolling(window=period).mean()            
+            RollDown = dDown.rolling(window=period).mean().abs()
+            RS = RollUp / RollDown
+            RSI = 100.0 - (100.0 / (1.0 + RS))
+            self.ema_dataframe['RSI'] = RSI
 
     def calculateCrossover(self):
         #Calculate EMA crossover and return signal
@@ -67,7 +81,7 @@ class Model(object):
             print(order)
             return -1 
 
-    def sell(self, product_id, CoinBase, quote_currency):
+    def sell(self, product_id, CoinBase, quote_currency, base_currency):
         #Sell cryptocurrency and return order information
         time = CoinBase.getTime()
         sell_price = CoinBase.determinePrice(product_id, 'sell')
@@ -84,10 +98,10 @@ class Model(object):
             print(order)
             return -1 
 
-    def sellUpper(self, product_id, CoinBase, quote_currency, price):
+    def sellUpper(self, product_id, CoinBase, quote_currency, price, base_currency):
         #Create limit sell order cryptocurrency and return order information
         time = CoinBase.getTime()
-        sell_price = float(price) * 1.004 #Limit profit at 0.4%
+        sell_price = float(price) * 1.003 #Limit profit at 0.3%
         quantity = CoinBase.getAccounts(quote_currency)
         order = CoinBase.sell(product_id, quantity, sell_price, True)
         if 'id' in order:
