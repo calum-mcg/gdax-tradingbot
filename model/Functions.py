@@ -62,12 +62,14 @@ class Model(object):
             self.ema_dataframe.loc[self.ema_dataframe.index[length-1], 'signal'] = signal['value']
             self.logPrice(True)
             return signal
+        else:
+            self.logPrice(True)
 
     def buy(self, product_id, CoinBase, base_currency):
         #Buy cryptocurrency and return order information
         time = CoinBase.getTime()
         buy_price = float(CoinBase.determinePrice(product_id, 'buy'))
-        balance = float(CoinBase.getBalance(base_currency))
+        balance = float(CoinBase.getBalance(base_currency)) * 0.1
         quantity = balance/buy_price
         order = CoinBase.buy(product_id, quantity, buy_price)
         if 'id' in order:
