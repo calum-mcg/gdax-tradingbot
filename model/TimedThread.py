@@ -15,9 +15,9 @@ class TimedThread(Thread):
         self.base_currency = base_currency
         #Authenticate details
         self.CoinBase = CoinbaseExchange(API_KEY, API_SECRET, API_PASS, API_URL)
-		#Create model
+	#Create model
         self.model = Model(csv_price, csv_transactions)
-		#Choose Product
+	#Choose Product
         self.product_id = self.CoinBase.getProductId(self.quote_currency, self.base_currency)
         #Specify timeout duration
         self.order_timeout = 900 #15 minutes (in seconds)
@@ -32,7 +32,7 @@ class TimedThread(Thread):
     def order(self, type):
     	if (type == 'sell'):
     		#Sell product
-			#Get all open orders and cancel
+		#Get all open orders and cancel
     		open_orders = self.CoinBase.getOrders()
     		if(len(open_orders) > 0):
     			for order in open_orders:
@@ -40,7 +40,7 @@ class TimedThread(Thread):
 
     		current_balance = float(self.CoinBase.getBalance(self.quote_currency))
     		if current_balance > 0:
-				#Sell current position
+			#Sell current position
 	    		order = self.model.sell(self.product_id, self.CoinBase, self.quote_currency, self.base_currency)
 	    		order_time = order['created_at']
 	    		order_id = order['id']
@@ -100,7 +100,7 @@ class TimedThread(Thread):
     			print('Time: {}, Order: Buy, No currency available.'.format(order_time))
 
     def EMACrossover(self):
-    	#Trigger order function on separate thread if EMA crossover detected & RSI within threshold
+	    #Trigger order function on separate thread if EMA crossover detected & RSI within threshold
 	    self.model.calculateEma(self.CoinBase, self.product_id)
 	    self.model.calculateRSI(14)
 	    signal = self.model.calculateCrossover()
