@@ -15,6 +15,8 @@ As the bot runs, all prices and transactions are logged into separate CSV files.
 
 _Use at your own risk._
 
+ _**Please Note** - As of Oct 2018, this project is no longer maintained_
+
 <a name="myfootnote1">1</a>: 01/2018 [GDAX Fees](https://www.gdax.com/fees/BTC-USD)
 
 ## Getting Started
